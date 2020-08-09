@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="ed236603-33a7-4554-8cab-d9d48f223277" name="ACMMM_bilibili" url="http://118.31.54.42">
+        <fileTransfer host="118.31.54.42" port="5504" rootFolder="/lingan" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="5504" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

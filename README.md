@@ -7,7 +7,7 @@ The code will be released soon. We will update follow-up works in this repositor
 
 
 ## Rhythmic Gymnastics Dataset
-The Rhythmic Gymnastics Dataset can be downloaded from [OneDrive][1].
+The Rhythmic Gymnastics Dataset can be downloaded from [here][1].
 
 
 
