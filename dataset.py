@@ -10,15 +10,16 @@ class Dset(Dataset):
     crop imag feat + video i3d feat
     '''
     def __init__(self, video_feat_path, image_feat_path, label_path,
-                 score_type='Total_Score', clip_num=28, image_num=80, rand_st=True, kind='Ball'):
+                clip_num=26, image_num=80, rand_st=True, action_type='Ball',
+                score_type='Total_Score'):
         self.data_path1 = video_feat_path
         self.data_path2 = image_feat_path
         self.clip_num = clip_num
         self.image_num = image_num
         self.rand_st = rand_st
-        self.label = self.read_label(label_path, score_type, kind)
+        self.label = self.read_label(label_path, score_type, action_type)
 
-    def read_label(self, label_path, score_type, kind):
+    def read_label(self, label_path, score_type, action_type):
         fr = open(label_path, 'r')
         idx = {'Difficulty_Score': 1, 'Execution_Score': 2, 'Total_Score': 3}
         labels = []
@@ -26,43 +27,48 @@ class Dset(Dataset):
             if i == 0:
                 continue
             line = line.strip().split()
-            if kind == line[0].split('_')[0]:
+            if action_type == line[0].split('_')[0]:
                 labels.append([line[0], float(line[idx[score_type]])])
         return labels
 
     def __getitem__(self, idx):
-        vid_feat = np.load(self.data_path1 + self.label[idx][0] + '.npy')
-        st = (len(vid_feat) - self.clip_num) // 2
-        if self.rand_st and len(vid_feat) != self.clip_num:
-            st = np.random.randint(0, len(vid_feat) - self.clip_num)
-        vid_feat = vid_feat[st:st + self.clip_num]
-        vid_feat = torch.from_numpy(vid_feat).float()
+        dynamic_feat = np.load(self.data_path1 + self.label[idx][0] + '.npy')
+        st = (len(dynamic_feat) - self.clip_num) // 2
+        if self.rand_st and len(dynamic_feat) != self.clip_num:
+            st = np.random.randint(0, len(dynamic_feat) - self.clip_num)
+        dynamic_feat = dynamic_feat[st:st + self.clip_num]
+        dynamic_feat = torch.from_numpy(dynamic_feat).float()
 
-        img_feat = np.load(self.data_path2 + self.label[idx][0] + '.npy')
-        if len(img_feat) < self.image_num:
-            raw_feat = np.zeros([self.image_num, img_feat.shape[1]])
-            raw_feat[:len(img_feat)] = img_feat
-            img_feat = raw_feat
-        st = (len(img_feat) - self.image_num) // 2
-        if self.rand_st and len(img_feat) != self.image_num:
-            st = np.random.randint(0, len(img_feat) - self.image_num)
-        img_feat = img_feat[st:st + self.image_num]
-        img_feat = torch.from_numpy(img_feat).float()
+        static_feat = np.load(self.data_path2 + self.label[idx][0] + '.npy')
+        if len(static_feat) < self.image_num:
+            raw_feat = np.zeros([self.image_num, static_feat.shape[1]])
+            raw_feat[:len(static_feat)] = static_feat
+            static_feat = raw_feat
+        st = (len(static_feat) - self.image_num) // 2
+        if self.rand_st and len(static_feat) != self.image_num:
+            st = np.random.randint(0, len(static_feat) - self.image_num)
+        static_feat = static_feat[st:st + self.image_num]
+        static_feat = torch.from_numpy(static_feat).float()
 
-        return vid_feat, img_feat, self.label[idx][1] / 25
+        return dynamic_feat, static_feat, self.label[idx][1] / 25
 
     def __len__(self):
         return len(self.label)
 
 
 if __name__ == '__main__':
-    vid_feat_path = './data/i3d_avg_fps5_clip16a/'
-    img_feat_path = './data/crop_image_feat_fps0.5/'
-    train_label_path = './data/final_train.txt'
 
-    dset = Dset(vid_feat_path, img_feat_path, train_label_path)
+    dynamic_feat_path = './data/dynamic_feat/'
+    static_feat_path = './data/static_feat/'
+    train_label_path = './data/train.txt'
+    test_label_path = './data/test.txt'
+    clip_num = 26
+    image_num = 80
+
+    dset = Dset(dynamic_feat_path, static_feat_path, test_label_path,
+                clip_num=clip_num, image_num=image_num, rand_st=False)
     dloader = DataLoader(dset, batch_size=1, shuffle=False)
 
-    for vid_feat, img_feat, label in dloader:
-        print(vid_feat.size(), img_feat.size(), label.size())
+    for dynamic_feat, static_feat, label in dloader:
+        print(dynamic_feat.size(), static_feat.size(), label.size())
         break

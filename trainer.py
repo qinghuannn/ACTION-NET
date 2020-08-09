@@ -16,11 +16,11 @@ from utils import weight_init, AverageMeter
 class Trainer(object):
     def __init__(self, conf, action_type='Ball', use_cuda=True):
         self.conf = conf
-        self.train_loader, self.test_loader = self.get_data_loader(conf)
+        self.train_loader, self.test_loader = self.get_data_loader(conf, action_type)
 
         self.device = torch.device('cuda' if use_cuda else 'cpu')
         self.model = self.load_model(conf).to(self.device)
-        self.optim = self.get_optim(conf, action_type)
+        self.optim = self.get_optim(conf)
         self.loss_fn = nn.MSELoss().cuda()
         self.best_coef = 0
 
@@ -34,7 +34,8 @@ class Trainer(object):
 
         model = ACTION_NET(clip_num=conf.clip_num, image_num=conf.image_num)
         flops, params = profile(model, inputs=(
-            torch.zeros(1, 28, 1024), torch.zeros(1, 80, 2048))
+            torch.zeros(1, self.conf.clip_num, 1024),
+            torch.zeros(1, self.conf.image_num, 2048))
         )
         model.apply(weight_init)
 
@@ -46,13 +47,13 @@ class Trainer(object):
         self.model.load_state_dict(torch.load('./pretrained_model/Ball.pth'))
         self.test_epoch()
 
-    def get_data_loader(self, conf, kind):
-        train_dset = Dset(conf.vid_feat_path, conf.img_feat_path, conf.train_label_path,
+    def get_data_loader(self, conf, action_type):
+        train_dset = Dset(conf.dynamic_feat_path, conf.static_feat_path, conf.train_label_path,
                         clip_num=conf.clip_num, image_num=conf.image_num,
-                        kind=kind)
-        test_dset = Dset(conf.vid_feat_path, conf.img_feat_path, conf.test_label_path,
+                        action_type=action_type)
+        test_dset = Dset(conf.dynamic_feat_path, conf.static_feat_path, conf.test_label_path,
                         clip_num=conf.clip_num, image_num=conf.image_num,
-                        rand_st=False, kind=kind)
+                        rand_st=False, action_type=action_type)
         train_dloader = DataLoader(train_dset, batch_size=conf.batch_size,
                                    shuffle=True, num_workers=8)
         test_dloader = DataLoader(test_dset, batch_size=conf.batch_size,
@@ -91,12 +92,12 @@ class Trainer(object):
         self.model.train()
         self.scheduler.step(epoch)
 
-        for i, (vid_feat, img_feat, label) in enumerate(self.train_loader):
-            vid_feat = vid_feat.to(self.device)
-            img_feat = img_feat.to(self.device)
+        for i, (dynamic_feat, static_feat, label) in enumerate(self.train_loader):
+            dynamic_feat = dynamic_feat.to(self.device)
+            static_feat = static_feat.to(self.device)
             label = label.float().to(self.device)
 
-            pred = self.model(vid_feat, img_feat)
+            pred = self.model(dynamic_feat, static_feat)
             loss = self.loss_fn(pred, label)
 
             self.optim.zero_grad()
@@ -125,11 +126,11 @@ class Trainer(object):
         self.model.eval()
 
         with torch.no_grad():
-            for i, (vid_feat, img_feat, label) in enumerate(self.test_loader):
-                vid_feat = vid_feat.to(self.device)
-                img_feat = img_feat.to(self.device)
+            for i, (dynamic_feat, static_feat, label) in enumerate(self.test_loader):
+                dynamic_feat = dynamic_feat.to(self.device)
+                static_feat = static_feat.to(self.device)
                 label = label.float().to(self.device)
-                pred = self.model(vid_feat, img_feat)
+                pred = self.model(dynamic_feat, static_feat)
                 loss = self.loss_fn(pred, label)
 
                 losses.update(loss.item(), pred.size(0))
