@@ -11,17 +11,16 @@ from trainer import Trainer
 
 def setup_seed(seed):
     np.random.seed(seed)
-    torch.manual_seed(seed)  # cpu
-    torch.cuda.manual_seed_all(seed)  # 并行gpu
-    torch.backends.cudnn.deterministic = True  # cpu/gpu结果一致
-    torch.backends.cudnn.benchmark = False  # 训练集变化不大时使训练加速
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-gpu', type=str, default='-1')
-    parser.add_argument('-action_type', type=str, default='Ball')
-    parser.add_argument('-train', action='store_true')
+    parser.add_argument('--gpu', type=str, default='-1')
+    parser.add_argument('--action_type', type=str, default='Ball')
     parser.add_argument('-test', action='store_true')
 
     args = parser.parse_args()
@@ -35,7 +34,7 @@ if __name__ == '__main__':
 
     trainer = Trainer(conf, args.action_type, use_gpu)
 
-    if args.train:
+    if not args.test:
         trainer.go()
-    elif args.test:
+    else:
         trainer.test()
