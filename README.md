@@ -2,7 +2,7 @@
 
 This is the code for ACMMM 2020 paper 'Hybrid Dynamic-static Context-aware Attention Network for Action Assessment in Long Videos'.
 
-
+The code should be directly runnable with PyTorch v1.0.1. 
 
 ## Rhythmic Gymnastics Dataset
 The Rhythmic Gymnastics Dataset can be downloaded from [here][1].
