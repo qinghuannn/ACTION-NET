@@ -13,5 +13,5 @@ The extracted features of Rhythmic Gymnastics Dataset can be downloaded from [he
 
 
 
-[1]: https://mail2sysueducn-my.sharepoint.com/:u:/g/personal/zenglan3_mail2_sysu_edu_cn/EUP1TVo1h0xHjwf3StGZUDQBegyRrkLZtqnYjmHgmEDY8A
-[2]: https://mail2sysueducn-my.sharepoint.com/:u:/g/personal/zenglan3_mail2_sysu_edu_cn/EZAMHnaNkH9DuMjy_Qa-zuoBYcB2y1xr_R6hK2kGUagBGA?e=7ojkTn
+[1]: https://1drv.ms/u/s!ApyE_Lf3PFl2issDbaK99shfZRKchg?e=fdd2eO
+[2]: https://1drv.ms/u/s!ApyE_Lf3PFl2isp_SOkeOhTYJSmfpg?e=Qc0g9L
